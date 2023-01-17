@@ -41,3 +41,6 @@ Exact:
 #brightnessMax=$(echo "scale=2; $brightnessMax * 0.60" | bc)
 brightnessMax=
 
+To run this script cd into dir and run bash "insert script name here"
+Watch how to use here: https://youtu.be/sZJW7ZYMIfs
+Not a channel plug, just wanted to demonstrate it.
