@@ -1,0 +1,84 @@
+#!/bin/bash
+#cbt-1.0 Rerelease
+#Define directory here!
+#
+#brightness file
+directoryBacklight=""
+#maxbrightness file
+directoryMaxBacklight=""
+#Define Min and Max values, percentage based.
+#Min, default 0.10
+brightnessMin=$(cat $directoryMaxBacklight)
+brightnessMin=$(echo "scale=2; $brightnessMin * 0.10" | bc)
+brightnessMin=${brightnessMin%.*}
+#Max, default 0.60
+brightnessMax=$(cat $directoryMaxBacklight)
+brightnessMax=$(echo "scale=2; $brightnessMax * 0.60" | bc)
+brightnessMax=${brightnessMax%.*}
+#
+#
+#Program starts here
+#Checks if brightness file exists.
+echo "Checking $directoryBacklight and $directoryMaxBacklight"
+directoryVerify=$directoryBacklight
+if test -f $directoryVerify -a -f $directoryMaxBacklight; then
+    sleep 1
+    echo "Succesful"
+    echo "Current Brightness = $(cat $directoryBacklight)"
+    echo "Actual Max Brightness = $(cat $directoryMaxBacklight)"
+else
+    echo "Either $directoryBacklight or $directoryMaxBacklight missing"
+    echo "Please check $directoryBacklight and $directoryMaxBacklight"
+    echo "Program terminated"
+    exit
+fi
+#Check for permissions, if false then execute chmod otherwise continue.
+if [ -w $directoryBacklight ]; then
+    echo "Permissions check passed."
+else 
+    echo "Permissions not set"
+    echo "Running chmod 666"
+    sudo chmod 666 $directoryBacklight
+    echo "Permission changed. proceeding.."
+fi
+#Summarize Min and Max values
+echo "Minimum Value for Brightness is $brightnessMin"
+echo "Maximum Value for Brightness is $brightnessMax"
+echo "Minimum and Maximum are user specified, Actual Max Brightness might be different"
+echo "Refer to the file check above to check"
+#Prompt
+read -p "Enter brightness value: " brightnessInput
+#Check if input is numerical
+if [[ "$brightnessInput" =~ ^[0-9]+$ ]]; then
+    echo "Input is numerical value"
+else
+    echo "Input is not numerical value"
+    echo "This program requires numerical value input only."
+    echo "Restart the program and enter your input again"
+    exit
+fi
+#Input Check
+if [ $brightnessInput -gt $brightnessMin ] || [ $brightnessInput -eq $brightnessMin ]; then
+    if [ $brightnessInput -lt $brightnessMax ] || [ $brightnessInput -eq $brightnessMax ]; then
+        echo "Conditions met"
+        echo "Input is $brightnessInput"
+    else 
+        echo "Conditions not met"
+        echo "Your input($brightnessInput) is greater than maximum brightness value($brightnessMax)"
+    exit
+    fi
+else 
+    echo "Conditions not met"
+    echo "Your input ($brightnessInput)is not greater than or equal minimum brightness($brightnessMin)"
+    exit
+fi
+#Write the input to the actual file
+echo "Changing brightness"
+echo $brightnessInput > $directoryBacklight
+if [ $(cat $directoryBacklight) -eq $brightnessInput ]; then
+    echo "Current brightness = $(cat $directoryBacklight)"
+    echo "Brightness change succesful"
+else
+    echo "Something went wrong, check if other programs is interfering."
+fi
+exit
